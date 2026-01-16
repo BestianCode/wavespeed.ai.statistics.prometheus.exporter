@@ -2,7 +2,7 @@
 
 Fetches Wavespeed.ai balance and usage statistics and exposes Prometheus metrics for Grafana dashboards.
 
-![Wavespeed.ai Statistics](https://raw.githubusercontent.com/wavespeed.ai.statistics.prometheus.exporter/refs/heads/master/grafana/Wavespeed_ai_statistic.json)
+![Wavespeed.ai Statistics](https://raw.githubusercontent.com/BestianCode/wavespeed.ai.statistics.prometheus.exporter/refs/heads/master/grafana/Wavespeed_ai_statistic.png)
 
 ## URLs
 
