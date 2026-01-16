@@ -13,8 +13,8 @@ on:
   push:
     tags:
       - '*'
-#    branches:
-#      - master
+    branches:
+      - develop
 
 jobs:
   push:
