@@ -1,0 +1,28 @@
+{{- if .Values.wavespeed.ingress.enabled -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "oshelm.fullname" . }}
+  labels:
+    {{- include "oshelm.labels" . | nindent 4 }}
+  annotations:
+    {{- with .Values.wavespeed.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: "nginx"
+  rules:
+  {{- range .Values.wavespeed.ingress.hosts }}
+  - host: {{ . }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "oshelm.fullname" $ }}
+            port:
+              number: {{ $.Values.wavespeed.service.port }}
+  {{- end }}
+{{- end }}

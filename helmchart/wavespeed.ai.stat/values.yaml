@@ -1,0 +1,45 @@
+wavespeed:
+
+  replicaCount: 1
+
+  image:
+    pullPolicy: IfNotPresent # Always, IfNotPresent, Never
+    name: bestian/wavespeed.ai.statistics.prometheus.exporter
+    tag: latest
+
+  imagePullSecrets: []
+
+  config:
+    app:
+      port: 8080
+
+  # Prefer a Secret reference for the token.
+  # Option A: reference an existing Secret
+  wsAiToken:
+    existingSecret: ""           # e.g. wavespeed-token
+    existingSecretKey: "WS_AI_TOKEN"
+    value: ""                    # not recommended; only for quick tests
+
+  env:
+    WS_AI_BASE_URL: "https://api.wavespeed.ai"
+    UPDATE_INTERVAL_SECONDS: "300"
+    REQUEST_TIMEOUT_SECONDS: "10"
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+  healthcheck_url: /healthz
+
+  service:
+    enabled: true
+    port: 80
+
+  ingress:
+    enabled: false
+    annotations: {}
+    hosts: []
