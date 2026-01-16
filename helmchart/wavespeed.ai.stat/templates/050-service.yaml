@@ -1,0 +1,24 @@
+{{- if or .Values.wavespeed.service.enabled .Values.wavespeed.ingress.enabled -}}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ include "oshelm.fullname" . }}
+  labels:
+    {{- include "oshelm.labels" . | nindent 4 }}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: {{ .Values.wavespeed.config.app.port | quote }}
+spec:
+  selector:
+    application: {{ include "oshelm.fullname" . }}
+  ports:
+    - name: main
+      protocol: TCP
+      port: {{ .Values.wavespeed.service.port }}
+      targetPort: {{ .Values.wavespeed.config.app.port }}
+    - name: app
+      protocol: TCP
+      port: {{ .Values.wavespeed.config.app.port }}
+      targetPort: {{ .Values.wavespeed.config.app.port }}
+{{- end }}

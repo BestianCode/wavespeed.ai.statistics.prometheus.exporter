@@ -78,8 +78,6 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Wavespeed exporter state
-wavespeed_state.json
 
 # IPython
 profile_default/

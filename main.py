@@ -19,7 +19,6 @@ TOKEN = os.getenv("WS_AI_TOKEN")
 PORT = int(os.getenv("PORT", "8080"))
 UPDATE_INTERVAL_SECONDS = int(os.getenv("UPDATE_INTERVAL_SECONDS", "300"))
 REQUEST_TIMEOUT_SECONDS = float(os.getenv("REQUEST_TIMEOUT_SECONDS", "10"))
-STATE_FILE = os.getenv("STATE_FILE", "./wavespeed_state.json")
 
 USAGE_WINDOW_DAYS = 31
 
@@ -45,40 +44,6 @@ def _escape_label_value(value: object) -> str:
     if value is None:
         return ""
     return str(value).replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
-
-
-def _atomic_write_json(path: str, payload: dict) -> None:
-    tmp_path = f"{path}.tmp"
-    with open(tmp_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2, sort_keys=True)
-    os.replace(tmp_path, path)
-
-
-def _load_state_from_disk() -> None:
-    global state
-    try:
-        with open(STATE_FILE, "r", encoding="utf-8") as f:
-            loaded = json.load(f)
-        if isinstance(loaded, dict):
-            with state_lock:
-                state["balance_usd"] = loaded.get("balance_usd")
-                state["daily"] = loaded.get("daily", {}) if isinstance(loaded.get("daily", {}), dict) else {}
-                state["last_success_utc"] = loaded.get("last_success_utc")
-                state["last_error"] = loaded.get("last_error")
-        logger.info("Loaded state from %s", STATE_FILE)
-    except FileNotFoundError:
-        logger.info("No state file found at %s (first start)", STATE_FILE)
-    except Exception as exc:
-        logger.warning("Failed to load state from %s: %s", STATE_FILE, exc)
-
-
-def _save_state_to_disk() -> None:
-    with state_lock:
-        snapshot = dict(state)
-    try:
-        _atomic_write_json(STATE_FILE, snapshot)
-    except Exception as exc:
-        logger.warning("Failed to save state to %s: %s", STATE_FILE, exc)
 
 
 def _auth_headers() -> dict:
@@ -220,7 +185,6 @@ def update_loop() -> None:
                 state["last_success_utc"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
                 state["last_error"] = None
 
-            _save_state_to_disk()
             logger.info("Updated data (balance + daily usage)")
         except Exception as exc:
             with state_lock:
@@ -293,7 +257,6 @@ def metrics() -> Response:
 
 
 if __name__ == "__main__":
-    _load_state_from_disk()
     fetch_thread = threading.Thread(target=update_loop, daemon=True)
     fetch_thread.start()
     app.run(host="0.0.0.0", port=PORT)
